@@ -2,9 +2,36 @@ import streamlit as st
 import requests
 import datetime
 # This is the address of your running FastAPI server
-API_URL = "https://salon-steve.onrender.com"
+
 
 st.set_page_config(page_title="Barber Admin Panel", layout="centered")
+import streamlit as st
+import requests
+import datetime
+
+st.set_page_config(page_title="Barber Admin Panel", layout="centered")
+
+# --- SECURITY LOGIN ---
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.title("🔒 Shop Login")
+    pwd = st.text_input("Enter Admin Password", type="password")
+    if st.button("Login"):
+        # This checks the password against a secure cloud vault
+        if pwd == st.secrets["shop_password"]:
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.error("Incorrect Password")
+    st.stop() # This prevents the rest of the page from loading
+
+API_URL = "https://salon-steve.onrender.com"
+st.title("💈 Shop Control Panel")
+
+# ... (Keep the rest of your existing code exactly as it is below this) ...
+
 st.title("💈 Shop Control Panel")
 
 # --- SECTION 1: ADD A NEW SERVICE ---
