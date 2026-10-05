@@ -32,7 +32,7 @@ st.title("💈 Shop Control Panel")
 
 # ... (Keep the rest of your existing code exactly as it is below this) ...
 
-st.title("💈 Shop Control Panel")
+
 
 # --- SECTION 1: ADD A NEW SERVICE ---
 st.header("Add a New Service")

@@ -8,6 +8,57 @@ st.set_page_config(page_title="Barber Menu", layout="wide", initial_sidebar_stat
 st.markdown("<h1 style='text-align: center; font-size: 5rem;'>PREMIUM CUTS</h1>", unsafe_allow_html=True)
 st.markdown("<h3 style='text-align: center; color: gray; margin-bottom: 50px;'>Walk-ins Welcome</h3>", unsafe_allow_html=True)
 
+# --- CUSTOM CSS FOR PREMIUM DESIGN ---
+st.markdown("""
+<style>
+    /* Hide the Streamlit top menu and footer for a clean TV display */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    
+    /* Style the main title */
+    .shop-title {
+        text-align: center; 
+        font-size: 5rem; 
+        font-weight: 900; 
+        color: #d4af37; /* Gold accent */
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        margin-bottom: 0px;
+    }
+    
+    /* Style the service cards */
+    .service-card {
+        background-color: #1a1c23;
+        padding: 25px; 
+        border-radius: 12px; 
+        margin-bottom: 25px; 
+        border-left: 5px solid #d4af37;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        transition: transform 0.2s;
+    }
+    
+    .service-card:hover {
+        transform: scale(1.02);
+    }
+    
+    .service-name {
+        margin: 0; 
+        color: #FFFFFF; 
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    
+    .service-desc {
+        margin: 8px 0 0 0; 
+        color: #a0aab5; 
+        font-size: 1.1rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+
 # --- 1. FETCH ACTIVE PROMOTIONS ---
 active_promos = []
 try:
@@ -55,9 +106,9 @@ try:
             # Render the final box
             with target_col:
                 st.markdown(f"""
-                <div style="background-color: #1E1E1E; padding: 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-                    <h2 style="margin: 0; color: #FFFFFF;">{svc['name']} <span style="float: right;">{price_html}</span></h2>
-                    <p style="margin: 5px 0 0 0; color: #AAAAAA; font-size: 1.2rem;">{svc['description']}</p>
+                <div class="service-card">
+                    <div class="service-name">{svc['name']} <span style="float: right;">{price_html}</span></div>
+                    <div class="service-desc">{svc['description']}</div>
                 </div>
                 """, unsafe_allow_html=True)
                 
