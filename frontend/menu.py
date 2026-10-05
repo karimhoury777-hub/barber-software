@@ -7,16 +7,13 @@ import base64
 API_URL = "https://salon-steve.onrender.com"
 BARBER_PHONE = "96181750142" 
 
-# Paths for images
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ASSETS_DIR = os.path.join(CURRENT_DIR, "assets")
 
-st.set_page_config(page_title="Salon Steve | Premium Grooming", layout="centered")
+st.set_page_config(page_title="Salon Steve | Premium Grooming", layout="centered", initial_sidebar_state="collapsed")
 
-# --- BACKGROUND IMAGE INJECTION ---
 def add_bg_from_local():
     logo_path = None
-    # Auto-detect if the logo is a jpeg, jpg, or png
     for ext in ["jpeg", "jpg", "png", "webp"]:
         temp_path = os.path.join(ASSETS_DIR, f"logo.{ext}")
         if os.path.exists(temp_path):
@@ -42,14 +39,20 @@ def add_bg_from_local():
 
 add_bg_from_local()
 
-# --- CLASSY, ELEGANT CSS ---
+# --- MOBILE-OPTIMIZED & ANIMATED CSS ---
 st.markdown("""
 <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Elegant Title */
+    /* Smooth Load Animation */
+    @keyframes fadeSlideUp {
+        0% { opacity: 0; transform: translateY(15px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Elegant Title - Desktop Default */
     .shop-title {
         text-align: center; 
         font-size: 5rem; 
@@ -60,29 +63,31 @@ st.markdown("""
         margin-bottom: 0px;
         font-family: 'Didot', 'Bodoni MT', 'Times New Roman', serif;
         text-shadow: 2px 2px 5px rgba(0,0,0,0.9);
+        animation: fadeSlideUp 0.8s ease-out;
     }
     .shop-subtitle {
         text-align: center; 
-        color: #B89768; /* Luxury Gold Accent */
+        color: #B89768;
         letter-spacing: 6px;
         font-size: 1.1rem;
-        font-weight: 400;
         text-transform: uppercase;
         margin-top: -10px;
         margin-bottom: 40px;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+        animation: fadeSlideUp 1s ease-out;
     }
     
-    /* Glassmorphism / Semi-transparent Service Cards */
+    /* Glassmorphism Service Cards */
     .service-card {
-        background: rgba(15, 15, 15, 0.80);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+        background: rgba(15, 15, 15, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         padding: 20px; 
-        border-radius: 8px; 
-        margin-bottom: 15px; 
-        border: 1px solid rgba(184, 151, 104, 0.3);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+        border-radius: 12px; 
+        margin-bottom: 10px; 
+        border: 1px solid rgba(184, 151, 104, 0.2);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+        animation: fadeSlideUp 0.6s ease-out backwards;
     }
     
     .service-name {
@@ -108,8 +113,39 @@ st.markdown("""
         text-transform: uppercase;
         border-bottom: 1px solid rgba(184, 151, 104, 0.3);
         padding-bottom: 10px;
-        margin-top: 30px;
+        margin-top: 40px;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        animation: fadeSlideUp 0.6s ease-out;
+    }
+
+    /* Enlarge Checkboxes for Mobile Touch */
+    .stCheckbox > label {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    /* 📱 MOBILE OVERRIDES */
+    @media (max-width: 768px) {
+        .shop-title { 
+            font-size: 3rem !important; 
+            letter-spacing: 6px !important; 
+            line-height: 1.2 !important;
+        }
+        .shop-subtitle { 
+            font-size: 0.8rem !important; 
+            letter-spacing: 3px !important; 
+            margin-bottom: 25px !important; 
+        }
+        .service-card { 
+            padding: 15px !important; 
+        }
+        .service-name { 
+            font-size: 1.15rem !important; 
+        }
+        h2 { 
+            font-size: 1.4rem !important; 
+            margin-top: 25px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -130,10 +166,11 @@ try:
         if active_promos:
             banner_text = "  •  ".join([f"🔥 {p['title']}: GET {p['discount_percentage']}% OFF! 🔥" for p in active_promos])
             st.markdown(f"""
-            <div style='background: rgba(184, 151, 104, 0.9); color: #000000; padding: 12px; 
-                        text-align: center; font-size: 1.1rem; font-weight: bold; 
-                        border-radius: 5px; margin-bottom: 30px; 
-                        text-transform: uppercase; letter-spacing: 1px;'>
+            <div style='background: rgba(184, 151, 104, 0.95); color: #000000; padding: 12px; 
+                        text-align: center; font-size: 1rem; font-weight: bold; 
+                        border-radius: 8px; margin-bottom: 25px; 
+                        text-transform: uppercase; letter-spacing: 1px;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.5);'>
                 {banner_text}
             </div>
             """, unsafe_allow_html=True)
@@ -151,6 +188,7 @@ except:
 # --- 3. DISPLAY MENU BY CATEGORY ---
 if services:
     categories = sorted(list(set([svc.get("category", "General") for svc in services])))
+    delay = 0.1 # Staggered animation delay
     
     for cat in categories:
         st.markdown(f"<h2>{cat}</h2>", unsafe_allow_html=True)
@@ -166,29 +204,31 @@ if services:
             original_price = svc['base_price']
             if best_discount > 0:
                 discounted_price = original_price * (1 - (best_discount / 100))
-                price_html = f"<span style='color: #888; text-decoration: line-through; font-size: 1.1rem; margin-right: 10px;'>${original_price:.2f}</span> <span style='color: #B89768;'>${discounted_price:.2f}</span>"
+                price_html = f"<span style='color: #888; text-decoration: line-through; font-size: 1rem; margin-right: 8px;'>${original_price:.2f}</span> <span style='color: #B89768;'>${discounted_price:.2f}</span>"
                 display_price = discounted_price
             else:
                 price_html = f"<span style='color: #B89768;'>${original_price:.2f}</span>"
                 display_price = original_price
 
-            col1, col2 = st.columns([4, 1])
-            with col1:
-                st.markdown(f"""
-                <div class="service-card">
-                    <div class="service-name">{svc['name']} <span style="float: right;">{price_html}</span></div>
-                    <div class="service-desc">{svc.get('description', '')}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            with col2:
-                st.write("")
-                is_selected = st.checkbox("Select", key=f"chk_{svc['id']}")
-                if is_selected:
-                    st.session_state.cart[svc['name']] = display_price
-                elif svc['name'] in st.session_state.cart:
-                    del st.session_state.cart[svc['name']]
+            # The card HTML
+            st.markdown(f"""
+            <div class="service-card" style="animation-delay: {delay}s;">
+                <div class="service-name">{svc['name']} <span style="float: right;">{price_html}</span></div>
+                <div class="service-desc">{svc.get('description', '')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Checkbox immediately beneath for easy thumb access on mobile
+            is_selected = st.checkbox(f"Add {svc['name']}", key=f"chk_{svc['id']}")
+            if is_selected:
+                st.session_state.cart[svc['name']] = display_price
+            elif svc['name'] in st.session_state.cart:
+                del st.session_state.cart[svc['name']]
+                
+            st.write("") # Micro-spacing
+            delay += 0.05
 
-# --- GALLERY (STRUCTURED 2x2 GRID) ---
+# --- GALLERY ---
 st.markdown("<h2>THE EXPERIENCE</h2>", unsafe_allow_html=True)
 g_col1, g_col2 = st.columns(2)
 
@@ -214,7 +254,7 @@ if st.session_state.cart:
     st.write("**Selected Services:**")
     for item, price in st.session_state.cart.items():
         st.write(f"- {item}: ${price:.2f}")
-    st.markdown(f"<h3 style='color: #B89768; margin-top: 10px;'>Total: ${total_price:.2f}</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color: #B89768; margin-top: 10px; border-top: 1px solid #333; padding-top: 10px;'>Total: ${total_price:.2f}</h3>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.subheader("Your Details")
@@ -244,8 +284,8 @@ if st.session_state.cart:
             whatsapp_url = f"https://wa.me/{BARBER_PHONE}?text={encoded_msg}"
             
             st.success("Order saved! Click below to notify Salon Steve.")
-            st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color:#B89768; color:black; padding:15px 32px; border:none; border-radius:5px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:10px; text-transform:uppercase; letter-spacing: 2px;">Send via WhatsApp</button></a>', unsafe_allow_html=True)
+            st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color:#B89768; color:black; padding:18px 32px; border:none; border-radius:8px; font-weight:bold; font-size:16px; cursor:pointer; width:100%; margin-top:10px; text-transform:uppercase; letter-spacing: 2px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">Send via WhatsApp</button></a>', unsafe_allow_html=True)
         else:
             st.error("Please enter your name and phone number.")
 else:
-    st.info("Your order is empty. Select a service above.")
+    st.info("Your order is empty. Select a service above to begin.")
