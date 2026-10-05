@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import time
 
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://salon-steve.onrender.com"
 
 st.set_page_config(page_title="Barber Menu", layout="wide", initial_sidebar_state="collapsed")
 st.markdown("<h1 style='text-align: center; font-size: 5rem;'>PREMIUM CUTS</h1>", unsafe_allow_html=True)

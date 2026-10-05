@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import datetime
 # This is the address of your running FastAPI server
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://salon-steve.onrender.com"
 
 st.set_page_config(page_title="Barber Admin Panel", layout="centered")
 st.title("💈 Shop Control Panel")
