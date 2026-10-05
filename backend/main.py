@@ -4,10 +4,10 @@ import models, schemas
 from database import engine, get_db
 import datetime
 
-# Automatically create tables in your Neon database
+# Automatically create tables
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Barber Menu API")
+app = FastAPI(title="Salon Steve API")
 
 @app.post("/services/", response_model=schemas.ServiceResponse)
 def create_service(service: schemas.ServiceCreate, db: Session = Depends(get_db)):
@@ -54,6 +54,16 @@ def read_active_promotions(db: Session = Depends(get_db)):
         models.Promotion.end_date >= now
     ).all()
     return promos
+
+# --- NEW: DELETE PROMOTIONS ---
+@app.delete("/promotions/{promo_id}")
+def delete_promotion(promo_id: int, db: Session = Depends(get_db)):
+    promo = db.query(models.Promotion).filter(models.Promotion.id == promo_id).first()
+    if promo:
+        db.delete(promo)
+        db.commit()
+        return {"status": "deleted"}
+    raise HTTPException(status_code=404, detail="Promotion not found")
 
 @app.post("/orders/", response_model=schemas.OrderResponse)
 def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):

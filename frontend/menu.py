@@ -46,13 +46,11 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* Smooth Load Animation */
     @keyframes fadeSlideUp {
         0% { opacity: 0; transform: translateY(15px); }
         100% { opacity: 1; transform: translateY(0); }
     }
     
-    /* Elegant Title - Desktop Default */
     .shop-title {
         text-align: center; 
         font-size: 5rem; 
@@ -72,12 +70,29 @@ st.markdown("""
         font-size: 1.1rem;
         text-transform: uppercase;
         margin-top: -10px;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
         text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
         animation: fadeSlideUp 1s ease-out;
     }
     
-    /* Glassmorphism Service Cards */
+    /* Elegant Instagram Button */
+    .ig-btn {
+        display: inline-block;
+        background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        color: white !important;
+        padding: 10px 25px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: bold;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+        transition: transform 0.2s;
+        animation: fadeSlideUp 1.2s ease-out;
+    }
+    .ig-btn:hover {
+        transform: scale(1.05);
+    }
+
     .service-card {
         background: rgba(15, 15, 15, 0.85);
         backdrop-filter: blur(10px);
@@ -91,21 +106,12 @@ st.markdown("""
     }
     
     .service-name {
-        margin: 0; 
-        color: #FFFFFF; 
-        font-size: 1.4rem;
-        font-weight: 500;
-        letter-spacing: 1px;
+        margin: 0; color: #FFFFFF; font-size: 1.4rem; font-weight: 500; letter-spacing: 1px;
     }
-    
     .service-desc {
-        margin: 6px 0 0 0; 
-        color: #A0A0A0; 
-        font-size: 0.95rem;
-        font-style: italic;
+        margin: 6px 0 0 0; color: #A0A0A0; font-size: 0.95rem; font-style: italic;
     }
     
-    /* Category Headers */
     h2 {
         color: #B89768 !important;
         font-family: 'Didot', 'Bodoni MT', 'Times New Roman', serif;
@@ -118,34 +124,14 @@ st.markdown("""
         animation: fadeSlideUp 0.6s ease-out;
     }
 
-    /* Enlarge Checkboxes for Mobile Touch */
-    .stCheckbox > label {
-        padding-top: 8px;
-        padding-bottom: 8px;
-    }
+    .stCheckbox > label { padding-top: 8px; padding-bottom: 8px; }
 
-    /* 📱 MOBILE OVERRIDES */
     @media (max-width: 768px) {
-        .shop-title { 
-            font-size: 3rem !important; 
-            letter-spacing: 6px !important; 
-            line-height: 1.2 !important;
-        }
-        .shop-subtitle { 
-            font-size: 0.8rem !important; 
-            letter-spacing: 3px !important; 
-            margin-bottom: 25px !important; 
-        }
-        .service-card { 
-            padding: 15px !important; 
-        }
-        .service-name { 
-            font-size: 1.15rem !important; 
-        }
-        h2 { 
-            font-size: 1.4rem !important; 
-            margin-top: 25px !important;
-        }
+        .shop-title { font-size: 3rem !important; letter-spacing: 6px !important; line-height: 1.2 !important;}
+        .shop-subtitle { font-size: 0.8rem !important; letter-spacing: 3px !important; margin-bottom: 25px !important; }
+        .service-card { padding: 15px !important; }
+        .service-name { font-size: 1.15rem !important; }
+        h2 { font-size: 1.4rem !important; margin-top: 25px !important; }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -153,6 +139,15 @@ st.markdown("""
 # --- HERO SECTION ---
 st.markdown("<h1 class='shop-title'>SALON STEVE</h1>", unsafe_allow_html=True)
 st.markdown("<p class='shop-subtitle'>Premium Grooming & Style</p>", unsafe_allow_html=True)
+
+# Instagram Link
+st.markdown("""
+<div style="text-align: center; margin-bottom: 30px;">
+    <a href="https://www.instagram.com/majd_houry?stkn=dDgxaG83Zzh2eXhm" target="_blank" class="ig-btn">
+        📸 Follow on Instagram
+    </a>
+</div>
+""", unsafe_allow_html=True)
 
 if "cart" not in st.session_state:
     st.session_state.cart = {}
@@ -188,7 +183,7 @@ except:
 # --- 3. DISPLAY MENU BY CATEGORY ---
 if services:
     categories = sorted(list(set([svc.get("category", "General") for svc in services])))
-    delay = 0.1 # Staggered animation delay
+    delay = 0.1 
     
     for cat in categories:
         st.markdown(f"<h2>{cat}</h2>", unsafe_allow_html=True)
@@ -210,7 +205,6 @@ if services:
                 price_html = f"<span style='color: #B89768;'>${original_price:.2f}</span>"
                 display_price = original_price
 
-            # The card HTML
             st.markdown(f"""
             <div class="service-card" style="animation-delay: {delay}s;">
                 <div class="service-name">{svc['name']} <span style="float: right;">{price_html}</span></div>
@@ -218,14 +212,13 @@ if services:
             </div>
             """, unsafe_allow_html=True)
             
-            # Checkbox immediately beneath for easy thumb access on mobile
             is_selected = st.checkbox(f"Add {svc['name']}", key=f"chk_{svc['id']}")
             if is_selected:
                 st.session_state.cart[svc['name']] = display_price
             elif svc['name'] in st.session_state.cart:
                 del st.session_state.cart[svc['name']]
                 
-            st.write("") # Micro-spacing
+            st.write("")
             delay += 0.05
 
 # --- GALLERY ---
