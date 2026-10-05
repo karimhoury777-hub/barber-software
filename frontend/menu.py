@@ -76,19 +76,117 @@ try:
     if promo_res.status_code == 200:
         active_promos = promo_res.json()
         if active_promos:
-            banner_text = "  •  ".join(
-                [f"🔥 {p['title']}: GET {p['discount_percentage']}% OFF! 🔥" for p in active_promos]
-            )
-            st.markdown(
-                f"""
-                <div style='background-color: #333333; color: white; padding: 15px; 
-                            text-align: center; font-size: 1.2rem; font-weight: bold; 
-                            border-radius: 8px; margin-bottom: 30px;'>
-                    {banner_text}
+            banner_text = "  •  ".join([f"🔥 {p['title']}: GET {p['discount_percentage']}% OFF! 🔥" for p in active_promos])
+            st.markdown(f"""
+            <div style='background-color: #333333; color: white; padding: 15px; 
+                        text-align: center; font-size: 1.2rem; font-weight: bold; 
+                        border-radius: 8px; margin-bottom: 30px; 
+                        text-transform: uppercase; border: 1px solid #555555;'>
+                {banner_text}
+            </div>
+            """, unsafe_allow_html=True)
+except:
+    pass
+
+# --- 2. FETCH SERVICES ---
+try:
+    response = requests.get(f"{API_URL}/services/")
+    services = response.json() if response.status_code == 200 else []
+except:
+    services = []
+    st.error("Cannot connect to server.")
+
+# --- 3. DISPLAY MENU BY CATEGORY ---
+if services:
+    categories = sorted(list(set([svc.get("category", "General") for svc in services])))
+    
+    for cat in categories:
+        st.header(f"💈 {cat}")
+        cat_services = [s for s in services if s.get("category", "General") == cat and s['is_active']]
+        
+        for svc in cat_services:
+            best_discount = 0.0
+            for p in active_promos:
+                if p['service_id'] is None or p['service_id'] == svc['id']:
+                    if p['discount_percentage'] > best_discount:
+                        best_discount = p['discount_percentage']
+            
+            original_price = svc['base_price']
+            if best_discount > 0:
+                discounted_price = original_price * (1 - (best_discount / 100))
+                price_html = f"<span style='color: #777777; text-decoration: line-through; font-size: 1.2rem; margin-right: 10px;'>${original_price:.2f}</span> <span style='color: #FFFFFF;'>${discounted_price:.2f}</span>"
+                display_price = discounted_price
+            else:
+                price_html = f"<span style='color: #FFFFFF;'>${original_price:.2f}</span>"
+                display_price = original_price
+
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.markdown(f"""
+                <div class="service-card">
+                    <div class="service-name">{svc['name']} <span style="float: right;">{price_html}</span></div>
+                    <div class="service-desc">{svc.get('description', '')}</div>
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
-except requests.exceptions.RequestException as exc:
-    st.warning(f"Could not load promotions: {exc}")
-                        
+                """, unsafe_allow_html=True)
+            with col2:
+                st.write("") 
+                st.write("") 
+                is_selected = st.checkbox("Add to Order", key=f"chk_{svc['id']}")
+                if is_selected:
+                    st.session_state.cart[svc['name']] = display_price
+                elif svc['name'] in st.session_state.cart:
+                    del st.session_state.cart[svc['name']]
+        st.divider()
+
+# --- TOOL IMAGES INTERSTITIAL ---
+col3, col4 = st.columns(2)
+with col3:
+    if os.path.exists("WhatsApp Image 2026-10-05 at 8.49.59 PM (1).jpeg"):
+        st.image("WhatsApp Image 2026-10-05 at 8.49.59 PM (1).jpeg", use_column_width=True) # Clippers close up
+with col4:
+    if os.path.exists("WhatsApp Image 2026-10-05 at 8.49.59 PM.jpeg"):
+        st.image("WhatsApp Image 2026-10-05 at 8.49.59 PM.jpeg", use_column_width=True) # Desk layout
+
+# --- 4. CHECKOUT & WHATSAPP ---
+st.header("🛒 Checkout")
+
+if st.session_state.cart:
+    total_price = sum(st.session_state.cart.values())
+    st.write("**Selected Services:**")
+    for item, price in st.session_state.cart.items():
+        st.write(f"- {item}: ${price:.2f}")
+    st.markdown(f"### **Total: ${total_price:.2f}**")
+    
+    st.divider()
+    st.subheader("Your Details")
+    cust_name = st.text_input("Full Name")
+    cust_phone = st.text_input("Phone Number")
+    
+    if st.button("Confirm Order & Send to Barber"):
+        if cust_name and cust_phone:
+            selected_items_str = ", ".join(st.session_state.cart.keys())
+            payload = {
+                "customer_name": cust_name,
+                "customer_phone": cust_phone,
+                "services_ordered": selected_items_str,
+                "total_price": total_price
+            }
+            requests.post(f"{API_URL}/orders/", json=payload)
+            
+            msg = f"💈 *NEW ORDER* 💈\n\n"
+            msg += f"*Client:* {cust_name}\n"
+            msg += f"*Phone:* {cust_phone}\n\n"
+            msg += f"*Services Requested:*\n"
+            for item, price in st.session_state.cart.items():
+                msg += f"- {item} (${price:.2f})\n"
+            msg += f"\n*Total Due:* ${total_price:.2f}"
+            
+            encoded_msg = urllib.parse.quote(msg)
+            whatsapp_url = f"https://wa.me/{BARBER_PHONE}?text={encoded_msg}"
+            
+            st.success("Order saved to the barber's database!")
+            st.markdown(f'<a href="{whatsapp_url}" target="_blank"><button style="background-color:#25D366; color:white; padding:15px 32px; border:none; border-radius:8px; font-weight:bold; font-size:18px; cursor:pointer; width:100%; margin-top:10px;">Send Order via WhatsApp</button></a>', unsafe_allow_html=True)
+        else:
+            st.error("Please enter your name and phone number so the barber knows who you are.")
+else:
+    st.info("Your order is empty. Select a service above.")
