@@ -61,3 +61,12 @@ def read_active_promotions(db: Session = Depends(get_db)):
         models.Promotion.end_date >= now
     ).all()
     return promos
+
+
+@app.post("/orders/", response_model=schemas.OrderResponse)
+def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
+    db_order = models.Order(**order.model_dump())
+    db.add(db_order)
+    db.commit()
+    db.refresh(db_order)
+    return db_order

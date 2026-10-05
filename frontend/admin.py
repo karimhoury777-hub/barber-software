@@ -37,27 +37,27 @@ st.title("💈 Shop Control Panel")
 # --- SECTION 1: ADD A NEW SERVICE ---
 st.header("Add a New Service")
 with st.form("add_service_form", clear_on_submit=True):
-    name = st.text_input("Service Name (e.g., Beard Trim)")
+    name = st.text_input("Service Name (e.g., Haircut + Beard)")
+    # New Category Selection
+    category = st.selectbox("Category", ["Hair", "Beard", "Treatments", "Coloring", "Other"])
     description = st.text_input("Description")
     price = st.number_input("Base Price ($)", min_value=0.0, format="%.2f")
     submit_button = st.form_submit_button("Save to Database")
 
     if submit_button:
-        # Send the data to your FastAPI backend
         payload = {
             "name": name,
+            "category": category, # Include category in payload
             "description": description,
             "base_price": price,
             "is_active": True
         }
         response = requests.post(f"{API_URL}/services/", json=payload)
-        
         if response.status_code == 200:
             st.success(f"'{name}' added successfully!")
+            st.rerun()
         else:
-            st.error("Failed to add service. Check your backend terminal for errors.")
-
-st.divider()
+            st.error("Failed to add service.")
 
 # --- SECTION 2: MANAGE CURRENT MENU ---
 st.header("Manage Current Menu")
