@@ -20,7 +20,14 @@ if not st.session_state.authenticated:
     st.stop()
 
 API_URL = "https://salon-steve.onrender.com"
-st.title("💈 Shop Control Panel")
+
+col1, col2 = st.columns([3, 1])
+with col1:
+    st.title("💈 Shop Control Panel")
+with col2:
+    st.write("")
+    if st.button("🔄 Sync Orders"):
+        st.rerun()
 
 # --- SECTION 1: ADD A NEW SERVICE ---
 st.header("Add a New Service")
@@ -49,7 +56,7 @@ with st.form("add_service_form", clear_on_submit=True):
 st.divider()
 
 # --- SECTION 2: MANAGE CURRENT MENU ---
-st.header("Manage Current Menu")
+st.header("Manage & Edit Menu")
 try:
     response = requests.get(f"{API_URL}/services/")
     if response.status_code == 200:
@@ -93,53 +100,61 @@ except:
 
 st.divider()
 
-# --- SECTION 3: LAUNCH A PROMOTION ---
-st.header("📢 Launch a Promotion")
-with st.form("add_promo_form", clear_on_submit=True):
-    promo_title = st.text_input("Promotion Title (e.g., Holiday Special)")
-    discount = st.number_input("Discount Percentage (%)", min_value=1.0, max_value=100.0, step=1.0)
-    
-    col1, col2 = st.columns(2)
-    today = datetime.date.today()
-    start_d = col1.date_input("Start Date", today)
-    end_d = col2.date_input("End Date", today + datetime.timedelta(days=7))
-    
-    submit_promo = st.form_submit_button("Launch Promotion")
-    
-    if submit_promo:
-        start_dt = datetime.datetime.combine(start_d, datetime.datetime.min.time()).isoformat()
-        end_dt = datetime.datetime.combine(end_d, datetime.datetime.max.time()).isoformat()
-        
-        promo_payload = {
-            "title": promo_title,
-            "discount_percentage": discount,
-            "start_date": start_dt,
-            "end_date": end_dt,
-            "service_id": None
-        }
-        promo_res = requests.post(f"{API_URL}/promotions/", json=promo_payload)
-        if promo_res.status_code == 200:
-            st.success(f"'{promo_title}' is now live!")
+# --- SECTION 3: MANAGE PROMOTIONS ---
+st.header("📢 Promotions")
+
+# 3A. Active Promotions List
+st.subheader("Active Sales")
+try:
+    promo_res = requests.get(f"{API_URL}/promotions/")
+    if promo_res.status_code == 200:
+        promos = promo_res.json()
+        if promos:
+            for p in promos:
+                c1, c2 = st.columns([3, 1])
+                c1.write(f"**{p['title']}** ({p['discount_percentage']}% OFF)")
+                if c2.button("Remove", key=f"del_promo_{p['id']}"):
+                    requests.delete(f"{API_URL}/promotions/{p['id']}")
+                    st.rerun()
         else:
-            st.error("Failed to launch promotion.")
+            st.info("No active promotions.")
+except:
+    st.error("Could not fetch promotions.")
+
+# 3B. Launch New Promotion
+with st.expander("Launch a New Promotion"):
+    with st.form("add_promo_form", clear_on_submit=True):
+        promo_title = st.text_input("Promotion Title (e.g., Holiday Special)")
+        discount = st.number_input("Discount Percentage (%)", min_value=1.0, max_value=100.0, step=1.0)
+        
+        col1, col2 = st.columns(2)
+        today = datetime.date.today()
+        start_d = col1.date_input("Start Date", today)
+        end_d = col2.date_input("End Date", today + datetime.timedelta(days=7))
+        
+        submit_promo = st.form_submit_button("Launch Promotion")
+        
+        if submit_promo:
+            start_dt = datetime.datetime.combine(start_d, datetime.datetime.min.time()).isoformat()
+            end_dt = datetime.datetime.combine(end_d, datetime.datetime.max.time()).isoformat()
+            
+            promo_payload = {
+                "title": promo_title,
+                "discount_percentage": discount,
+                "start_date": start_dt,
+                "end_date": end_dt,
+                "service_id": None
+            }
+            promo_post = requests.post(f"{API_URL}/promotions/", json=promo_payload)
+            if promo_post.status_code == 200:
+                st.success("Promotion launched!")
+                st.rerun()
+            else:
+                st.error("Failed to launch promotion.")
 
 st.divider()
 
-# --- SECTION 4: PRINTABLE QR CODE ---
-st.header("📱 Customer QR Code")
-st.write("Print this code and place it on the shop mirrors or front desk.")
-
-# IMPORTANT: Keep your actual Streamlit Menu URL here
-MENU_URL = "https://YOUR-MENU-APP-URL.streamlit.app" 
-qr_image_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={MENU_URL}"
-
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.image(qr_image_url, caption="Scan for Menu")
-
-st.divider()
-
-# --- SECTION 5: CLIENT DATABASE & ORDERS ---
+# --- SECTION 4: CLIENT DATABASE & ORDERS ---
 st.header("📋 Client Database & Orders")
 try:
     orders_res = requests.get(f"{API_URL}/orders/")
