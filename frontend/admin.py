@@ -57,7 +57,7 @@ try:
         if services:
             for svc in services:
                 with st.expander(f"💈 {svc['name']} - ${svc['base_price']:.2f}"):
-                    with st.form(f"edit_form_{svc['id']}")):
+                    with st.form(f"edit_form_{svc['id']}"):
                         new_name = st.text_input("Name", value=svc['name'])
                         
                         current_cat = svc.get('category', 'General')
