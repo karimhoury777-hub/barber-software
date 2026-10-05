@@ -7,8 +7,9 @@ import os
 API_URL = "https://salon-steve.onrender.com"
 BARBER_PHONE = "96181750142" 
 
-# Guarantees the app always looks in the exact folder where this file lives
+# Point directly to the new assets folder
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.join(CURRENT_DIR, "assets")
 
 st.set_page_config(page_title="Salon Steve | Menu", layout="centered")
 
@@ -57,9 +58,7 @@ st.markdown("""
 # --- HERO SECTION & BRANDING ---
 col1, col2 = st.columns([1, 2])
 with col1:
-    img1 = os.path.join(CURRENT_DIR, "WhatsApp Image 2026-10-05 at 8.49.58 PM.jpeg")
-    if os.path.exists(img1):
-        st.image(img1, use_column_width=True)
+    st.image(os.path.join(ASSETS_DIR, "pole.jpeg"), use_column_width=True)
 with col2:
     st.write("") 
     st.markdown("<h1 class='shop-title'>SALON<br>STEVE</h1>", unsafe_allow_html=True)
@@ -67,9 +66,7 @@ with col2:
 
 st.divider()
 
-img2 = os.path.join(CURRENT_DIR, "WhatsApp Image 2026-10-05 at 8.49.58 PM (1).jpeg")
-if os.path.exists(img2):
-    st.image(img2, use_column_width=True)
+st.image(os.path.join(ASSETS_DIR, "scissors.jpeg"), use_column_width=True)
 
 if "cart" not in st.session_state:
     st.session_state.cart = {}
@@ -146,13 +143,9 @@ if services:
 # --- TOOL IMAGES INTERSTITIAL ---
 col3, col4 = st.columns(2)
 with col3:
-    img3 = os.path.join(CURRENT_DIR, "WhatsApp Image 2026-10-05 at 8.49.59 PM (1).jpeg")
-    if os.path.exists(img3):
-        st.image(img3, use_column_width=True)
+    st.image(os.path.join(ASSETS_DIR, "clippers.jpeg"), use_column_width=True)
 with col4:
-    img4 = os.path.join(CURRENT_DIR, "WhatsApp Image 2026-10-05 at 8.49.59 PM.jpeg")
-    if os.path.exists(img4):
-        st.image(img4, use_column_width=True)
+    st.image(os.path.join(ASSETS_DIR, "desk.jpeg"), use_column_width=True)
 
 # --- 4. CHECKOUT & WHATSAPP ---
 st.header("🛒 Checkout")
