@@ -133,3 +133,19 @@ with st.form("add_promo_form", clear_on_submit=True):
             st.success(f"'{promo_title}' is now live!")
         else:
             st.error("Failed to launch promotion.")
+
+st.divider()
+
+# --- SECTION 4: PRINTABLE QR CODE ---
+st.header("📱 Customer QR Code")
+st.write("Print this code and place it on the shop mirrors or front desk. Customers can scan it to view the live menu on their own phones.")
+
+# Paste your actual live menu URL inside the quotes below
+MENU_URL = "https://YOUR-MENU-APP-URL.streamlit.app" 
+
+# Generate and display the QR code instantly
+qr_image_url = f"https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={MENU_URL}"
+
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.image(qr_image_url, caption="Scan for Menu")
